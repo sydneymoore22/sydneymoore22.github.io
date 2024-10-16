@@ -1,8 +1,15 @@
-th { 
-  border-bottom:1px solid gray;
+.blue {
+  color: #0C2340;
+}
+.red {
+  color: #BD1F2D;
 }
 
-td {  
+th { 
+  border-bottom: 1px solid gray;
+}
+
+td {
   text-align: center;
 }
 
@@ -10,7 +17,7 @@ td.left {
   text-align: left;
 }
 
-a{
+a {
   text-decoration: none;
 }
 
