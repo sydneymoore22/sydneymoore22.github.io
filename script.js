@@ -1,7 +1,7 @@
-functiondownloadData() {
+function downloadData() {
   event.preventDefault();
-  varstartdate = document.getElementById("startdate").value;
-  varenddate = document.getElementById("enddate").value;
+  var startdate = document.getElementById("startdate").value;
+  var enddate = document.getElementById("enddate").value;
   alert(startdate);
   alert(enddate);
 }
