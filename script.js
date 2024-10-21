@@ -1,9 +1,21 @@
 function filterData() {
   event.preventDefault();
-  var startdate = document.getElementById("startdate").value;
-  var enddate = document.getElementById("enddate").value;
-  console.log(startdate);
-  console.log(enddate);
+  
+  var startdate = new Date(document.getElementById("startdate").value);
+  var enddate = new Date(document.getElementById("enddate").value);
+  var tableRows = document.getElementById('pitchTable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+  for (var i = 0; i < tableRows.length; i++) {
+      var row = tableRows[i];
+      var dateCell = row.cells[1].innerText; // Assuming the date is in the second column
+      var rowDate = new Date(dateCell);
+      
+      if (rowDate >= startdate && rowDate <= enddate) {
+          row.style.display = ''; // Show the row
+      } else {
+          row.style.display = 'none'; // Hide the row
+      }
+  }
 }
 
 async function fetchPitchData() {
