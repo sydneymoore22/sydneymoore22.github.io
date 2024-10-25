@@ -33,6 +33,10 @@
         .sorted-desc::after {
             content: ' ▼'; /* Descending arrow */
         }
+        #stats {
+            font-weight: bold;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -66,6 +70,11 @@
             <!-- Rows will be populated here -->
         </tbody>
     </table>
+    <div id="stats">
+        <p id="mean"></p>
+        <p id="median"></p>
+        <p id="mode"></p>
+    </div>
     <script>
         let currentSort = { column: -1, order: 'asc' };
 
@@ -78,6 +87,7 @@
                 const dateCell = new Date(row.cells[1].innerText); // Assuming the date is in the second column
                 row.style.display = (dateCell >= startdate && dateCell <= enddate) ? '' : 'none'; // Show or hide the row
             }
+            calculateStats(); // Recalculate stats after filtering
         }
 
         async function fetchPitchData() {
@@ -112,6 +122,62 @@
                 `;
                 tableBody.appendChild(row);
             });
+            calculateStats(); // Calculate stats when data is populated
+        }
+
+        function calculateStats() {
+            const tableBody = document.getElementById('pitchTable').querySelector('tbody');
+            const rows = Array.from(tableBody.rows);
+            const numericColumns = [4, 5, 6, 8, 9, 10]; // Columns to calculate stats for
+            const stats = {};
+
+            numericColumns.forEach(col => {
+                const values = rows.map(row => {
+                    const value = parseFloat(row.cells[col].innerText);
+                    return isNaN(value) ? null : value;
+                }).filter(v => v !== null);
+
+                if (values.length > 0) {
+                    stats[col] = {
+                        mean: calculateMean(values),
+                        median: calculateMedian(values),
+                        mode: calculateMode(values)
+                    };
+                }
+            });
+
+            displayStats(stats);
+        }
+
+        function calculateMean(values) {
+            const sum = values.reduce((acc, val) => acc + val, 0);
+            return (sum / values.length).toFixed(2);
+        }
+
+        function calculateMedian(values) {
+            values.sort((a, b) => a - b);
+            const mid = Math.floor(values.length / 2);
+            return values.length % 2 !== 0 ? values[mid] : ((values[mid - 1] + values[mid]) / 2).toFixed(2);
+        }
+
+        function calculateMode(values) {
+            const frequency = {};
+            values.forEach(value => {
+                frequency[value] = (frequency[value] || 0) + 1;
+            });
+            const maxFreq = Math.max(...Object.values(frequency));
+            const modes = Object.keys(frequency).filter(key => frequency[key] === maxFreq);
+            return modes.length === 1 ? modes[0] : modes.join(', '); // Return all modes if there are multiple
+        }
+
+        function displayStats(stats) {
+            const meanText = `Mean - Balls: ${stats[4]?.mean || 'N/A'}, Strikes: ${stats[5]?.mean || 'N/A'}, Outs: ${stats[6]?.mean || 'N/A'}, KorBB: ${stats[8]?.mean || 'N/A'}, RelSpeed: ${stats[9]?.mean || 'N/A'}, SpinRate: ${stats[10]?.mean || 'N/A'}`;
+            const medianText = `Median - Balls: ${stats[4]?.median || 'N/A'}, Strikes: ${stats[5]?.median || 'N/A'}, Outs: ${stats[6]?.median || 'N/A'}, KorBB: ${stats[8]?.median || 'N/A'}, RelSpeed: ${stats[9]?.median || 'N/A'}, SpinRate: ${stats[10]?.median || 'N/A'}`;
+            const modeText = `Mode - Balls: ${stats[4]?.mode || 'N/A'}, Strikes: ${stats[5]?.mode || 'N/A'}, Outs: ${stats[6]?.mode || 'N/A'}, KorBB: ${stats[8]?.mode || 'N/A'}, RelSpeed: ${stats[9]?.mode || 'N/A'}, SpinRate: ${stats[10]?.mode || 'N/A'}`;
+
+            document.getElementById('mean').innerText = meanText;
+            document.getElementById('median').innerText = medianText;
+            document.getElementById('mode').innerText = modeText;
         }
 
         function sortTable(columnIndex) {
@@ -134,6 +200,8 @@
             const headers = tableBody.parentElement.querySelectorAll('th');
             headers.forEach(header => header.classList.remove('sorted-asc', 'sorted-desc'));
             headers[columnIndex].classList.add(isAsc ? 'sorted-desc' : 'sorted-asc');
+
+            calculateStats(); // Recalculate stats after sorting
         }
 
         // Fetch data on page load
